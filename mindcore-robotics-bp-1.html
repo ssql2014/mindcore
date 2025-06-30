@@ -398,11 +398,80 @@
         
         @media (max-width: 768px) {
             .slide {
-                padding: 30px 20px;
+                padding: 20px 15px;
+                height: auto;
+                min-height: 100vh;
+            }
+            
+            .slide-header {
+                flex-direction: column;
+                align-items: flex-start;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
             }
             
             .slide-title {
-                font-size: 24px;
+                font-size: 20px;
+                line-height: 1.2;
+            }
+            
+            .slide-subtitle {
+                font-size: 14px;
+            }
+            
+            .slide-content {
+                padding-right: 0;
+            }
+            
+            .card {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            
+            .card-title {
+                font-size: 18px;
+            }
+            
+            .value-card {
+                flex-direction: column;
+                text-align: center;
+                padding: 12px;
+            }
+            
+            .value-icon {
+                width: 50px;
+                height: 50px;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            
+            .comparison-table {
+                font-size: 12px;
+                overflow-x: auto;
+                display: block;
+            }
+            
+            .comparison-table th, .comparison-table td {
+                padding: 8px;
+                font-size: 11px;
+            }
+            
+            .architecture, .team-structure {
+                font-size: 10px;
+                padding: 10px;
+                overflow-x: auto;
+            }
+            
+            .timeline {
+                flex-direction: column;
+            }
+            
+            .timeline::before {
+                display: none;
+            }
+            
+            .timeline-item {
+                margin-bottom: 20px;
             }
             
             .funding-breakdown {
@@ -412,10 +481,111 @@
             .funding-item {
                 width: 48%;
                 margin-bottom: 15px;
+                padding: 12px;
+            }
+            
+            .funding-percent {
+                font-size: 20px;
             }
             
             .risk-matrix {
                 grid-template-columns: 1fr;
+            }
+            
+            .risk-card {
+                padding: 12px;
+            }
+            
+            .controls {
+                bottom: 10px;
+                gap: 10px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+            
+            .progress-bar {
+                width: 200px;
+                top: 10px;
+            }
+            
+            .slide-counter {
+                top: 5px;
+                right: 10px;
+                font-size: 12px;
+            }
+            
+            .logo {
+                font-size: 18px;
+                top: 10px;
+                left: 15px;
+            }
+            
+            /* Specific adjustments for content-heavy slides */
+            .slide#slide1 .card {
+                padding: 30px 15px;
+            }
+            
+            .slide#slide1 h2 {
+                font-size: 24px !important;
+            }
+            
+            .slide#slide1 p {
+                font-size: 16px !important;
+            }
+            
+            .slide#slide1 .card > div > div {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .slide#slide1 .card > div > div > div {
+                font-size: 36px !important;
+            }
+            
+            /* Ensure touch-friendly spacing */
+            button, .btn, .timeline-item, .funding-item, .risk-card, .value-card {
+                min-height: 44px;
+            }
+            
+            /* Better scrolling for mobile */
+            .slide-content {
+                -webkit-overflow-scrolling: touch;
+                overflow-y: auto;
+                max-height: calc(100vh - 150px);
+            }
+            
+            /* Adjust grid layouts for mobile */
+            .slide#slide10 .card > div,
+            .slide#slide11 .card > div {
+                grid-template-columns: 1fr;
+            }
+            
+            /* Text size adjustments for better readability */
+            p {
+                font-size: 14px;
+                line-height: 1.5;
+            }
+            
+            ul li {
+                font-size: 14px;
+                margin-bottom: 8px;
+            }
+            
+            /* Prevent horizontal scroll */
+            body {
+                overflow-x: hidden;
+            }
+            
+            .container {
+                padding: 0;
+            }
+            
+            .presentation {
+                height: 100vh;
+                overflow: hidden;
             }
         }
     </style>
@@ -1264,6 +1434,34 @@ CEO(1) + CTO(1)
                 slideCounters.forEach((counter, index) => {
                     counter.textContent = `${index + 1}/${totalSlides}`;
                 });
+            }
+            
+            // Touch gesture support for mobile
+            let touchStartX = 0;
+            let touchEndX = 0;
+            
+            document.addEventListener('touchstart', function(e) {
+                touchStartX = e.changedTouches[0].screenX;
+            }, false);
+            
+            document.addEventListener('touchend', function(e) {
+                touchEndX = e.changedTouches[0].screenX;
+                handleGesture();
+            }, false);
+            
+            function handleGesture() {
+                const swipeThreshold = 50;
+                const diff = touchStartX - touchEndX;
+                
+                if (Math.abs(diff) > swipeThreshold) {
+                    if (diff > 0) {
+                        // Swiped left - go to next slide
+                        nextBtn.click();
+                    } else {
+                        // Swiped right - go to previous slide
+                        prevBtn.click();
+                    }
+                }
             }
         });
     </script>
