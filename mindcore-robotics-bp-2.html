@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindCore - 机器人大脑智能芯片</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #0a0e27;
+            color: #fff;
+            overflow: hidden;
+        }
+        
+        .presentation {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .slide {
+            position: absolute;
+            width: 90%;
+            max-width: 1200px;
+            height: 90%;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            background: linear-gradient(135deg, #1a1f3a 0%, #0f1629 100%);
+            border-radius: 20px;
+            padding: 60px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
+        
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            opacity: 1;
+        }
+        
+        .slide-controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 1000;
+        }
+        
+        .control-btn {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .slide-indicator {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        /* 标题页样式 */
+        .title-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .title-slide h1 {
+            font-size: 4em;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+        
+        .title-slide .subtitle {
+            font-size: 1.8em;
+            color: #a0a9c9;
+            margin-bottom: 40px;
+        }
+        
+        .title-slide .highlight {
+            font-size: 1.4em;
+            color: #64ffda;
+            margin: 10px 0;
+        }
+        
+        /* 内容页样式 */
+        h2 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #64ffda;
+            border-bottom: 2px solid rgba(100, 255, 218, 0.3);
+            padding-bottom: 15px;
+        }
+        
+        h3 {
+            font-size: 1.8em;
+            margin: 20px 0 15px 0;
+            color: #8892b0;
+        }
+        
+        p {
+            font-size: 1.2em;
+            line-height: 1.8;
+            color: #ccd6f6;
+            margin-bottom: 20px;
+        }
+        
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        li {
+            font-size: 1.2em;
+            line-height: 1.8;
+            color: #ccd6f6;
+            margin-bottom: 15px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: #64ffda;
+        }
+        
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        th {
+            background: rgba(100, 255, 218, 0.1);
+            padding: 15px;
+            text-align: left;
+            font-size: 1.1em;
+            color: #64ffda;
+            border-bottom: 2px solid rgba(100, 255, 218, 0.2);
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 1.05em;
+        }
+        
+        /* 特殊元素样式 */
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .metric-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(100, 255, 218, 0.2);
+            transition: transform 0.3s;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .metric-value {
+            font-size: 2.5em;
+            color: #64ffda;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .metric-label {
+            color: #8892b0;
+            font-size: 1.1em;
+        }
+        
+        .architecture-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(100, 255, 218, 0.3);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-line;
+            font-size: 1.1em;
+            color: #64ffda;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+        
+        .timeline-item {
+            display: flex;
+            margin-bottom: 30px;
+            align-items: center;
+        }
+        
+        .timeline-marker {
+            width: 60px;
+            height: 60px;
+            background: rgba(100, 255, 218, 0.2);
+            border: 2px solid #64ffda;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+        
+        .phase-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        .phase-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(100, 255, 218, 0.2);
+            border-radius: 12px;
+            padding: 25px;
+            transition: all 0.3s;
+        }
+        
+        .phase-card:hover {
+            transform: translateY(-5px);
+            background: rgba(100, 255, 218, 0.05);
+        }
+        
+        .phase-title {
+            color: #64ffda;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .fund-allocation {
+            display: flex;
+            margin: 30px 0;
+            height: 60px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .fund-segment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #0a0e27;
+            position: relative;
+        }
+        
+        .cta-section {
+            text-align: center;
+            margin-top: 50px;
+            padding: 40px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-radius: 16px;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 18px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.3em;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+        <div class="slide-indicator">
+            <span id="current-slide">1</span> / <span id="total-slides">12</span>
+        </div>
+        
+        <!-- Slide 1: 标题页 -->
+        <div class="slide active title-slide">
+            <h1>MindCore</h1>
+            <p class="subtitle">全球首个算控一体机器人大脑芯片</p>
+            <p class="highlight">🚀 天使轮融资 | 1亿人民币</p>
+            <p class="highlight">🎯 填补40-60 TOPS市场空白</p>
+            <p class="highlight">⚡ 单芯片实现5ms超低延迟</p>
+        </div>
+        
+        <!-- Slide 2: 市场机会 -->
+        <div class="slide">
+            <h2>千亿级市场机会</h2>
+            <div class="metric-grid">
+                <div class="metric-card">
+                    <div class="metric-value">$526亿</div>
+                    <div class="metric-label">2032年市场规模</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">29.7%</div>
+                    <div class="metric-label">年复合增长率</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">40%</div>
+                    <div class="metric-label">中国市场份额</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">475亿</div>
+                    <div class="metric-label">大基金三期(美元)</div>
+                </div>
+            </div>
+            <div class="highlight-box">
+                <h3>核心痛点</h3>
+                <ul>
+                    <li>算控分离导致30ms+系统延迟</li>
+                    <li>20-60 TOPS中端市场完全空白</li>
+                    <li>90%依赖进口，供应链风险巨大</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Slide 3: 产品定位 -->
+        <div class="slide">
+            <h2>MindCore-1: 重新定义机器人芯片</h2>
+            <p style="font-size: 1.5em; color: #64ffda; text-align: center; margin: 30px 0;">
+                不是"又一个AI芯片"，而是"机器人的完整大脑"
+            </p>
+            <div class="architecture-box">
+┌─────────────────────────────────────────┐
+│         MindCore-1 统一架构              │
+├─────────────────────────────────────────┤
+│  认知层：60 TOPS NPU + 8路ISP + CPU     │
+│  ↕ 零延迟共享内存 ↕                      │
+│  控制层：4×RISC-V MCU + 专用外设         │
+│  ↕ 硬件消息队列 ↕                        │
+│  接口层：PCIe + MIPI + CAN + EtherCAT   │
+└─────────────────────────────────────────┘
+            </div>
+            <p style="text-align: center; font-size: 1.3em; margin-top: 30px;">
+                单芯片实现：感知 + 决策 + 控制
+            </p>
+        </div>
+        
+        <!-- Slide 4: 性能对比 -->
+        <div class="slide">
+            <h2>压倒性的性能优势</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>特性</th>
+                        <th>MindCore-1</th>
+                        <th>NVIDIA方案</th>
+                        <th>传统方案</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>系统组成</td>
+                        <td style="color: #64ffda;">单芯片</td>
+                        <td>Orin + MCU</td>
+                        <td>CPU + GPU + MCU</td>
+                    </tr>
+                    <tr>
+                        <td>系统延迟</td>
+                        <td style="color: #64ffda;">&lt;5ms</td>
+                        <td>30ms+</td>
+                        <td>50ms+</td>
+                    </tr>
+                    <tr>
+                        <td>总成本</td>
+                        <td style="color: #64ffda;">$150</td>
+                        <td>$650+</td>
+                        <td>$800+</td>
+                    </tr>
+                    <tr>
+                        <td>开发复杂度</td>
+                        <td style="color: #64ffda;">统一SDK</td>
+                        <td>两套系统</td>
+                        <td>三套系统</td>
+                    </tr>
+                    <tr>
+                        <td>功耗</td>
+                        <td style="color: #64ffda;">15W</td>
+                        <td>25W+</td>
+                        <td>40W+</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Slide 5: AI增强设计 -->
+        <div class="slide">
+            <h2>AI增强设计：务实的创新路径</h2>
+            <p style="font-size: 1.4em; text-align: center; margin-bottom: 40px;">
+                不是"全自动设计"，而是"人机协同"
+            </p>
+            <div class="phase-grid">
+                <div class="phase-card">
+                    <div class="phase-title">架构探索层</div>
+                    <p>AI主导</p>
+                    <ul>
+                        <li>10万+架构组合探索</li>
+                        <li>帕累托最优设计</li>
+                        <li>专家评审决策</li>
+                    </ul>
+                </div>
+                <div class="phase-card">
+                    <div class="phase-title">模块优化层</div>
+                    <p>AI辅助</p>
+                    <ul>
+                        <li>NPU单元优化</li>
+                        <li>内存带宽平衡</li>
+                        <li>关键路径优化</li>
+                    </ul>
+                </div>
+                <div class="phase-card">
+                    <div class="phase-title">验证加速层</div>
+                    <p>AI增强</p>
+                    <ul>
+                        <li>自动测试生成</li>
+                        <li>智能覆盖分析</li>
+                        <li>异常场景挖掘</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 6: 技术验证路线 -->
+        <div class="slide">
+            <h2>分阶段技术验证</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker">0-6月</div>
+                    <div>
+                        <h3>FPGA原型</h3>
+                        <p>架构验证 | 风险等级：低</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">6-12月</div>
+                    <div>
+                        <h3>MPW流片</h3>
+                        <p>工艺验证 | 风险等级：中</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">12-18月</div>
+                    <div>
+                        <h3>工程样片</h3>
+                        <p>系统验证 | 风险等级：中</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">18-24月</div>
+                    <div>
+                        <h3>量产芯片</h3>
+                        <p>规模验证 | 风险等级：高</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 7: 商业模式 -->
+        <div class="slide">
+            <h2>三阶段发展战略</h2>
+            <div class="phase-grid">
+                <div class="phase-card">
+                    <div class="phase-title">第1阶段 (0-18月)</div>
+                    <p><strong>技术验证与标杆客户</strong></p>
+                    <ul>
+                        <li>2-3家深度合作伙伴</li>
+                        <li>NRE费用+技术服务</li>
+                        <li>验证产品，建立口碑</li>
+                    </ul>
+                </div>
+                <div class="phase-card">
+                    <div class="phase-title">第2阶段 (18-36月)</div>
+                    <p><strong>规模销售与生态建设</strong></p>
+                    <ul>
+                        <li>首年5万片，次年50万片</li>
+                        <li>完整软件工具链</li>
+                        <li>营收目标：7500万美元</li>
+                    </ul>
+                </div>
+                <div class="phase-card">
+                    <div class="phase-title">第3阶段 (36月后)</div>
+                    <p><strong>平台化发展</strong></p>
+                    <ul>
+                        <li>系列化产品线</li>
+                        <li>软件订阅服务</li>
+                        <li>生态系统收入</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="highlight-box" style="margin-top: 30px;">
+                <p><strong>已确认合作：</strong> Alpha客户(TOP5人形机器人公司)已签技术合作协议</p>
+            </div>
+        </div>
+        
+        <!-- Slide 8: 团队规划 -->
+        <div class="slide">
+            <h2>分阶段团队扩展</h2>
+            <div class="metric-grid">
+                <div class="metric-card">
+                    <div class="metric-value">20人</div>
+                    <div class="metric-label">天使轮核心团队</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">60人</div>
+                    <div class="metric-label">A轮完整研发</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">100人</div>
+                    <div class="metric-label">量产全功能组织</div>
+                </div>
+            </div>
+            <div class="highlight-box">
+                <h3>核心团队</h3>
+                <ul>
+                    <li><strong>CEO：</strong>连续创业者，深厚行业资源</li>
+                    <li><strong>CTO：</strong>15年芯片设计经验，前大厂架构总监</li>
+                    <li><strong>首席架构师：</strong>前汽车芯片公司NPU负责人(确认加入)</li>
+                    <li><strong>软件VP：</strong>前AI芯片独角兽软件团队负责人(确认加入)</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Slide 9: 资金用途 -->
+        <div class="slide">
+            <h2>天使轮资金用途（1亿人民币）</h2>
+            <div class="fund-allocation">
+                <div class="fund-segment" style="width: 40%; background: #667eea;">
+                    研发投入 40%
+                </div>
+                <div class="fund-segment" style="width: 20%; background: #764ba2;">
+                    团队建设 20%
+                </div>
+                <div class="fund-segment" style="width: 20%; background: #64ffda;">
+                    IP/EDA 20%
+                </div>
+                <div class="fund-segment" style="width: 10%; background: #f687b3;">
+                    流片费用 10%
+                </div>
+                <div class="fund-segment" style="width: 10%; background: #a78bfa;">
+                    运营储备 10%
+                </div>
+            </div>
+            <table style="margin-top: 40px;">
+                <tbody>
+                    <tr>
+                        <td>研发投入</td>
+                        <td>4000万</td>
+                        <td>架构设计、RTL开发、FPGA原型</td>
+                    </tr>
+                    <tr>
+                        <td>团队建设</td>
+                        <td>2000万</td>
+                        <td>20位核心成员薪资（18个月）</td>
+                    </tr>
+                    <tr>
+                        <td>IP/EDA</td>
+                        <td>2000万</td>
+                        <td>RISC-V核、接口IP、EDA工具授权</td>
+                    </tr>
+                    <tr>
+                        <td>流片费用</td>
+                        <td>1000万</td>
+                        <td>MPW多项目晶圆</td>
+                    </tr>
+                    <tr>
+                        <td>运营储备</td>
+                        <td>1000万</td>
+                        <td>日常运营、设备、意外支出</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Slide 10: 关键里程碑 -->
+        <div class="slide">
+            <h2>18个月关键里程碑</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                <div>
+                    <h3 style="color: #667eea;">技术里程碑</h3>
+                    <ul>
+                        <li><strong>M1 (3个月)：</strong>完成详细架构设计</li>
+                        <li><strong>M2 (6个月)：</strong>FPGA原型达标80%</li>
+                        <li><strong>M3 (9个月)：</strong>RTL设计完成验证</li>
+                        <li><strong>M4 (12个月)：</strong>MPW流片成功</li>
+                        <li><strong>M5 (15个月)：</strong>客户POC通过</li>
+                        <li><strong>M6 (18个月)：</strong>完成A轮融资</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 style="color: #64ffda;">商业里程碑</h3>
+                    <ul>
+                        <li>签约3家标杆客户</li>
+                        <li>获得首批意向订单（5万片）</li>
+                        <li>建立开发者社区（500+）</li>
+                        <li>完成关键专利布局</li>
+                        <li>建立供应链体系</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 11: 投资价值 -->
+        <div class="slide">
+            <h2>投资价值与护城河</h2>
+            <div class="metric-grid">
+                <div class="metric-card">
+                    <div class="metric-value">千亿</div>
+                    <div class="metric-label">市场机会</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">18-24月</div>
+                    <div class="metric-label">窗口期优势</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">5-7年</div>
+                    <div class="metric-label">IPO路径</div>
+                </div>
+            </div>
+            <div class="highlight-box">
+                <h3>核心护城河</h3>
+                <ul>
+                    <li><strong>架构级创新：</strong>算控一体需要深度架构创新</li>
+                    <li><strong>先发优势：</strong>快速占领中端市场空白</li>
+                    <li><strong>生态绑定：</strong>与标杆客户共同定义标准</li>
+                    <li><strong>本土优势：</strong>更快响应、深度定制、完整服务</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Slide 12: 行动呼吁 -->
+        <div class="slide">
+            <h2>共创机器人芯片新时代</h2>
+            <div class="cta-section">
+                <h3 style="font-size: 2em; margin-bottom: 30px;">为什么是我们？</h3>
+                <ul style="text-align: left; max-width: 800px; margin: 0 auto;">
+                    <li><strong>团队基因：</strong>不是学术项目，而是产业老兵的创业</li>
+                    <li><strong>务实路线：</strong>不追求技术极限，而是解决真实痛点</li>
+                    <li><strong>长期思维：</strong>不是投机风口，而是十年产业机会</li>
+                </ul>
+                <div style="margin-top: 40px;">
+                    <p style="font-size: 1.5em; color: #64ffda;">期待与您的合作</p>
+                    <p>不仅是资金支持，更需要产业资源和战略指导</p>
+                </div>
+                <a href="#" class="cta-button">立即联系我们</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="slide-controls">
+        <button class="control-btn" onclick="previousSlide()">上一页</button>
+        <button class="control-btn" onclick="nextSlide()">下一页</button>
+    </div>
+    
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 12;
+        
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            
+            if (n > totalSlides) currentSlide = 1;
+            if (n < 1) currentSlide = totalSlides;
+            
+            slides.forEach(slide => {
+                slide.classList.remove('active');
+            });
+            
+            slides[currentSlide - 1].classList.add('active');
+            
+            document.getElementById('current-slide').textContent = currentSlide;
+        }
+        
+        function nextSlide() {
+            currentSlide++;
+            showSlide(currentSlide);
+        }
+        
+        function previousSlide() {
+            currentSlide--;
+            showSlide(currentSlide);
+        }
+        
+        // 键盘控制
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') previousSlide();
+        });
+        
+        // 初始化
+        document.getElementById('total-slides').textContent = totalSlides;
+    </script>
+</body>
+</html>
