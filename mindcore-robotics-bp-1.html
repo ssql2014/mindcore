@@ -591,18 +591,8 @@
     </style>
 </head>
 <body>
-    <!-- Password Protection Layer -->
-    <div id="passwordLayer" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0e27; display: flex; align-items: center; justify-content: center; z-index: 10000;">
-        <div style="background: linear-gradient(135deg, #1a1f3a 0%, #0f1629 100%); padding: 40px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); text-align: center;">
-            <h2 style="color: #64ffda; margin-bottom: 20px;">访问需要密码</h2>
-            <input type="password" id="passwordInput" placeholder="请输入密码" style="padding: 12px 20px; font-size: 16px; border: 1px solid #64ffda; background: rgba(255, 255, 255, 0.1); color: #fff; border-radius: 8px; width: 250px; margin-bottom: 20px;" />
-            <br>
-            <button onclick="checkPassword()" style="padding: 12px 30px; background: #64ffda; color: #0a0e27; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">确认</button>
-            <p id="errorMessage" style="color: #ff5757; margin-top: 15px; display: none;">密码错误，请重试</p>
-        </div>
-    </div>
 
-    <div class="container" style="display: none;" id="mainContent">
+    <div class="container" id="mainContent">
         <div class="presentation">
             <div class="logo">MindCore Robotics</div>
             <div class="progress-bar">
@@ -1393,34 +1383,8 @@ CEO(1) + CTO(1)
     </div>
 
     <script>
-        // Password protection
-        function checkPassword() {
-            const password = document.getElementById('passwordInput').value;
-            const correctPassword = 'mindcore2024'; // 您可以修改这个密码
-            
-            if (password === correctPassword) {
-                document.getElementById('passwordLayer').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'block';
-                sessionStorage.setItem('authenticated', 'true');
-            } else {
-                document.getElementById('errorMessage').style.display = 'block';
-                document.getElementById('passwordInput').value = '';
-            }
-        }
-        
-        // Allow Enter key to submit password
-        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                checkPassword();
-            }
-        });
-        
-        // Check if already authenticated
+        // Initialize presentation
         document.addEventListener('DOMContentLoaded', function() {
-            if (sessionStorage.getItem('authenticated') === 'true') {
-                document.getElementById('passwordLayer').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'block';
-            }
             const slides = document.querySelectorAll('.slide');
             const prevBtn = document.getElementById('prevBtn');
             const nextBtn = document.getElementById('nextBtn');
