@@ -1216,10 +1216,11 @@
     
     <script>
         let currentSlide = 1;
-        const totalSlides = document.querySelectorAll('.slide').length;
+        let totalSlides = 16; // 总共16页
         
         function showSlide(n) {
             const slides = document.querySelectorAll('.slide');
+            totalSlides = slides.length; // 动态更新总页数
             if (n > totalSlides) currentSlide = 1;
             if (n < 1) currentSlide = totalSlides;
             
@@ -1292,7 +1293,11 @@
         }
         
         // Initialize
-        showSlide(currentSlide);
+        window.addEventListener('DOMContentLoaded', () => {
+            totalSlides = document.querySelectorAll('.slide').length;
+            document.getElementById('total-slides').textContent = totalSlides;
+            showSlide(currentSlide);
+        });
     </script>
 </body>
 </html>
