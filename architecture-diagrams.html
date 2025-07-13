@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindCore Vision 架构图 - V4.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #1a5490;
+            font-weight: 700;
+        }
+        
+        h2 {
+            font-size: 1.8em;
+            margin: 40px 0 20px;
+            color: #2c5282;
+            border-bottom: 3px solid #3182ce;
+            padding-bottom: 10px;
+        }
+        
+        .diagram-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin: 30px 0;
+        }
+        
+        .diagram-title {
+            font-size: 1.4em;
+            color: #2d3748;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        svg {
+            width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9em;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        .interactive-hint {
+            text-align: center;
+            color: #718096;
+            font-size: 0.9em;
+            margin-top: 15px;
+        }
+        
+        .export-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .export-btn {
+            padding: 10px 20px;
+            background: #3182ce;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s ease;
+        }
+        
+        .export-btn:hover {
+            background: #2c5282;
+        }
+        
+        /* Tooltip styles */
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+        
+        /* Animation styles */
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
+        }
+        
+        .animated-flow {
+            animation: pulse 2s infinite;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            .export-buttons {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MindCore Vision 芯片架构图</h1>
+        <p style="text-align: center; color: #718096; margin-bottom: 40px;">
+            基于"眼脑合一"理念的异构SoC架构设计 - V4.0
+        </p>
+
+        <!-- 1. 整体架构图 -->
+        <div class="diagram-container">
+            <h3 class="diagram-title">1. MindCore Vision SoC 整体架构</h3>
+            <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+                <!-- Background -->
+                <rect width="1200" height="800" fill="#f8fafc"/>
+                
+                <!-- Main SoC Container -->
+                <rect x="50" y="50" width="1100" height="700" rx="20" fill="#e6f2ff" stroke="#3182ce" stroke-width="3"/>
+                <text x="600" y="90" text-anchor="middle" font-size="28" font-weight="bold" fill="#1a365d">
+                    MindCore Vision SoC
+                </text>
+                
+                <!-- RISC-V CPU Cluster -->
+                <g id="cpu-cluster">
+                    <rect x="100" y="150" width="300" height="200" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+                    <text x="250" y="180" text-anchor="middle" font-size="18" font-weight="bold" fill="#92400e">
+                        高性能RISC-V处理器簇
+                    </text>
+                    <text x="250" y="210" text-anchor="middle" font-size="14" fill="#78350f">
+                        8核64位 @ 2.8GHz
+                    </text>
+                    <rect x="120" y="230" width="120" height="40" rx="5" fill="#fed7aa" stroke="#f97316" stroke-width="1"/>
+                    <text x="180" y="255" text-anchor="middle" font-size="12" fill="#7c2d12">主控核心</text>
+                    <rect x="260" y="230" width="120" height="40" rx="5" fill="#fed7aa" stroke="#f97316" stroke-width="1"/>
+                    <text x="320" y="255" text-anchor="middle" font-size="12" fill="#7c2d12">应用处理</text>
+                    <rect x="190" y="285" width="120" height="40" rx="5" fill="#fed7aa" stroke="#f97316" stroke-width="1"/>
+                    <text x="250" y="310" text-anchor="middle" font-size="12" fill="#7c2d12">实时控制核</text>
+                </g>
+                
+                <!-- VPU (Vision Processing Unit) -->
+                <g id="vpu">
+                    <rect x="450" y="150" width="300" height="200" rx="10" fill="#d1fae5" stroke="#10b981" stroke-width="2"/>
+                    <text x="600" y="180" text-anchor="middle" font-size="18" font-weight="bold" fill="#064e3b">
+                        视觉处理单元 (VPU)
+                    </text>
+                    <text x="600" y="210" text-anchor="middle" font-size="14" fill="#065f46">
+                        定制ISP + 3D感知引擎
+                    </text>
+                    <rect x="470" y="230" width="120" height="40" rx="5" fill="#a7f3d0" stroke="#059669" stroke-width="1"/>
+                    <text x="530" y="255" text-anchor="middle" font-size="12" fill="#064e3b">16路ISP阵列</text>
+                    <rect x="610" y="230" width="120" height="40" rx="5" fill="#a7f3d0" stroke="#059669" stroke-width="1"/>
+                    <text x="670" y="255" text-anchor="middle" font-size="12" fill="#064e3b">3D深度计算</text>
+                    <rect x="540" y="285" width="120" height="40" rx="5" fill="#a7f3d0" stroke="#059669" stroke-width="1"/>
+                    <text x="600" y="310" text-anchor="middle" font-size="12" fill="#064e3b">视频编解码</text>
+                </g>
+                
+                <!-- NPU (AI Engine) -->
+                <g id="npu">
+                    <rect x="800" y="150" width="300" height="200" rx="10" fill="#ede9fe" stroke="#8b5cf6" stroke-width="2"/>
+                    <text x="950" y="180" text-anchor="middle" font-size="18" font-weight="bold" fill="#4c1d95">
+                        AI引擎 (NPU)
+                    </text>
+                    <text x="950" y="210" text-anchor="middle" font-size="14" fill="#5b21b6">
+                        100 TOPS @ INT8
+                    </text>
+                    <rect x="820" y="230" width="120" height="40" rx="5" fill="#ddd6fe" stroke="#7c3aed" stroke-width="1"/>
+                    <text x="880" y="255" text-anchor="middle" font-size="12" fill="#4c1d95">张量处理核</text>
+                    <rect x="960" y="230" width="120" height="40" rx="5" fill="#ddd6fe" stroke="#7c3aed" stroke-width="1"/>
+                    <text x="1020" y="255" text-anchor="middle" font-size="12" fill="#4c1d95">向量处理器</text>
+                    <rect x="890" y="285" width="120" height="40" rx="5" fill="#ddd6fe" stroke="#7c3aed" stroke-width="1"/>
+                    <text x="950" y="310" text-anchor="middle" font-size="12" fill="#4c1d95">AI加速器</text>
+                </g>
+                
+                <!-- Unified Memory Architecture -->
+                <rect x="100" y="400" width="1000" height="100" rx="10" fill="#fee2e2" stroke="#ef4444" stroke-width="2"/>
+                <text x="600" y="430" text-anchor="middle" font-size="20" font-weight="bold" fill="#991b1b">
+                    统一低延迟内存架构 (UMA)
+                </text>
+                <text x="600" y="460" text-anchor="middle" font-size="16" fill="#dc2626">
+                    200GB/s LPDDR5X | 支持3D堆叠封装
+                </text>
+                <text x="600" y="485" text-anchor="middle" font-size="14" fill="#b91c1c">
+                    共享内存池 | 零拷贝数据流 | 智能预取
+                </text>
+                
+                <!-- Sensor Interface -->
+                <rect x="100" y="540" width="480" height="80" rx="10" fill="#f0fdf4" stroke="#22c55e" stroke-width="2"/>
+                <text x="340" y="565" text-anchor="middle" font-size="16" font-weight="bold" fill="#14532d">
+                    传感器接口阵列
+                </text>
+                <text x="340" y="595" text-anchor="middle" font-size="14" fill="#166534">
+                    16×MIPI CSI-2 | 支持Sensor-in-Package封装
+                </text>
+                
+                <!-- Security & Control -->
+                <rect x="620" y="540" width="480" height="80" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+                <text x="860" y="565" text-anchor="middle" font-size="16" font-weight="bold" fill="#92400e">
+                    安全与控制子系统
+                </text>
+                <text x="860" y="595" text-anchor="middle" font-size="14" fill="#78350f">
+                    专用RISC-V安全核 | 硬件加密引擎 | 安全启动
+                </text>
+                
+                <!-- External Interfaces -->
+                <rect x="100" y="650" width="1000" height="60" rx="10" fill="#f3f4f6" stroke="#6b7280" stroke-width="2"/>
+                <text x="600" y="685" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">
+                    外部接口: PCIe 4.0 x8 | 2×10GbE | CAN-FD | USB 3.2 | UART/SPI/I2C
+                </text>
+                
+                <!-- Data Flow Arrows -->
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#3182ce"/>
+                    </marker>
+                </defs>
+                
+                <!-- CPU to Memory -->
+                <path d="M 250 350 L 250 400" stroke="#3182ce" stroke-width="3" marker-end="url(#arrowhead)" class="animated-flow"/>
+                <!-- VPU to Memory -->
+                <path d="M 600 350 L 600 400" stroke="#3182ce" stroke-width="3" marker-end="url(#arrowhead)" class="animated-flow"/>
+                <!-- NPU to Memory -->
+                <path d="M 950 350 L 950 400" stroke="#3182ce" stroke-width="3" marker-end="url(#arrowhead)" class="animated-flow"/>
+                <!-- Memory to Sensor -->
+                <path d="M 340 500 L 340 540" stroke="#3182ce" stroke-width="3" marker-end="url(#arrowhead)" class="animated-flow"/>
+                <!-- Memory to Security -->
+                <path d="M 860 500 L 860 540" stroke="#3182ce" stroke-width="3" marker-end="url(#arrowhead)" class="animated-flow"/>
+            </svg>
+            
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #fef3c7;"></div>
+                    <span>处理单元</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #d1fae5;"></div>
+                    <span>视觉处理</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ede9fe;"></div>
+                    <span>AI加速</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #fee2e2;"></div>
+                    <span>内存系统</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f0fdf4;"></div>
+                    <span>I/O接口</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 数据流架构图 -->
+        <div class="diagram-container">
+            <h3 class="diagram-title">2. 眼脑合一数据流架构</h3>
+            <svg viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg">
+                <!-- Background -->
+                <rect width="1200" height="700" fill="#f8fafc"/>
+                
+                <!-- Title -->
+                <text x="600" y="40" text-anchor="middle" font-size="24" font-weight="bold" fill="#1a365d">
+                    从感知到决策的数据流
+                </text>
+                
+                <!-- Sensor Layer -->
+                <g id="sensor-layer">
+                    <rect x="50" y="80" width="200" height="500" rx="10" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+                    <text x="150" y="110" text-anchor="middle" font-size="18" font-weight="bold" fill="#064e3b">
+                        传感器层
+                    </text>
+                    
+                    <!-- Individual Sensors -->
+                    <rect x="70" y="140" width="160" height="60" rx="5" fill="#a7f3d0" stroke="#059669" stroke-width="1"/>
+                    <text x="150" y="175" text-anchor="middle" font-size="14" fill="#064e3b">RGB相机阵列</text>
+                    
+                    <rect x="70" y="220" width="160" height="60" rx="5" fill="#a7f3d0" stroke="#059669" stroke-width="1"/>
+                    <text x="150" y="255" text-anchor="middle" font-size="14" fill="#064e3b">深度相机</text>
+                    
+                    <rect x="70" y="300" width="160" height="60" rx="5" fill="#a7f3d0" stroke="#059669" stroke-width="1"/>
+                    <text x="150" y="335" text-anchor="middle" font-size="14" fill="#064e3b">激光雷达</text>
+                    
+                    <rect x="70" y="380" width="160" height="60" rx="5" fill="#a7f3d0" stroke="#059669" stroke-width="1"/>
+                    <text x="150" y="415" text-anchor="middle" font-size="14" fill="#064e3b">IMU/GPS</text>
+                    
+                    <rect x="70" y="460" width="160" height="60" rx="5" fill="#a7f3d0" stroke="#059669" stroke-width="1"/>
+                    <text x="150" y="495" text-anchor="middle" font-size="14" fill="#064e3b">其他传感器</text>
+                </g>
+                
+                <!-- VPU Processing -->
+                <g id="vpu-processing">
+                    <rect x="300" y="80" width="250" height="500" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+                    <text x="425" y="110" text-anchor="middle" font-size="18" font-weight="bold" fill="#92400e">
+                        VPU处理
+                    </text>
+                    
+                    <rect x="325" y="140" width="200" height="80" rx="5" fill="#fed7aa" stroke="#f97316" stroke-width="1"/>
+                    <text x="425" y="165" text-anchor="middle" font-size="14" font-weight="bold" fill="#7c2d12">ISP预处理</text>
+                    <text x="425" y="185" text-anchor="middle" font-size="12" fill="#7c2d12">降噪/HDR/色彩校正</text>
+                    <text x="425" y="205" text-anchor="middle" font-size="12" fill="#7c2d12">畸变矫正/稳定</text>
+                    
+                    <rect x="325" y="240" width="200" height="80" rx="5" fill="#fed7aa" stroke="#f97316" stroke-width="1"/>
+                    <text x="425" y="265" text-anchor="middle" font-size="14" font-weight="bold" fill="#7c2d12">特征提取</text>
+                    <text x="425" y="285" text-anchor="middle" font-size="12" fill="#7c2d12">边缘检测/关键点</text>
+                    <text x="425" y="305" text-anchor="middle" font-size="12" fill="#7c2d12">深度估计/光流</text>
+                    
+                    <rect x="325" y="340" width="200" height="80" rx="5" fill="#fed7aa" stroke="#f97316" stroke-width="1"/>
+                    <text x="425" y="365" text-anchor="middle" font-size="14" font-weight="bold" fill="#7c2d12">数据融合</text>
+                    <text x="425" y="385" text-anchor="middle" font-size="12" fill="#7c2d12">多传感器校准</text>
+                    <text x="425" y="405" text-anchor="middle" font-size="12" fill="#7c2d12">时空同步</text>
+                    
+                    <rect x="325" y="440" width="200" height="80" rx="5" fill="#fed7aa" stroke="#f97316" stroke-width="1"/>
+                    <text x="425" y="465" text-anchor="middle" font-size="14" font-weight="bold" fill="#7c2d12">实时渲染</text>
+                    <text x="425" y="485" text-anchor="middle" font-size="12" fill="#7c2d12">3D重建/可视化</text>
+                    <text x="425" y="505" text-anchor="middle" font-size="12" fill="#7c2d12">AR叠加显示</text>
+                </g>
+                
+                <!-- NPU AI Processing -->
+                <g id="npu-processing">
+                    <rect x="600" y="80" width="250" height="500" rx="10" fill="#ede9fe" stroke="#8b5cf6" stroke-width="2"/>
+                    <text x="725" y="110" text-anchor="middle" font-size="18" font-weight="bold" fill="#4c1d95">
+                        NPU AI处理
+                    </text>
+                    
+                    <rect x="625" y="140" width="200" height="80" rx="5" fill="#ddd6fe" stroke="#7c3aed" stroke-width="1"/>
+                    <text x="725" y="165" text-anchor="middle" font-size="14" font-weight="bold" fill="#4c1d95">感知识别</text>
+                    <text x="725" y="185" text-anchor="middle" font-size="12" fill="#4c1d95">物体检测/分类</text>
+                    <text x="725" y="205" text-anchor="middle" font-size="12" fill="#4c1d95">场景理解</text>
+                    
+                    <rect x="625" y="240" width="200" height="80" rx="5" fill="#ddd6fe" stroke="#7c3aed" stroke-width="1"/>
+                    <text x="725" y="265" text-anchor="middle" font-size="14" font-weight="bold" fill="#4c1d95">SLAM定位</text>
+                    <text x="725" y="285" text-anchor="middle" font-size="12" fill="#4c1d95">视觉里程计</text>
+                    <text x="725" y="305" text-anchor="middle" font-size="12" fill="#4c1d95">地图构建</text>
+                    
+                    <rect x="625" y="340" width="200" height="80" rx="5" fill="#ddd6fe" stroke="#7c3aed" stroke-width="1"/>
+                    <text x="725" y="365" text-anchor="middle" font-size="14" font-weight="bold" fill="#4c1d95">VLA模型</text>
+                    <text x="725" y="385" text-anchor="middle" font-size="12" fill="#4c1d95">视觉-语言理解</text>
+                    <text x="725" y="405" text-anchor="middle" font-size="12" fill="#4c1d95">动作预测</text>
+                    
+                    <rect x="625" y="440" width="200" height="80" rx="5" fill="#ddd6fe" stroke="#7c3aed" stroke-width="1"/>
+                    <text x="725" y="465" text-anchor="middle" font-size="14" font-weight="bold" fill="#4c1d95">决策推理</text>
+                    <text x="725" y="485" text-anchor="middle" font-size="12" fill="#4c1d95">路径规划</text>
+                    <text x="725" y="505" text-anchor="middle" font-size="12" fill="#4c1d95">行为决策</text>
+                </g>
+                
+                <!-- CPU Control -->
+                <g id="cpu-control">
+                    <rect x="900" y="80" width="250" height="500" rx="10" fill="#fee2e2" stroke="#ef4444" stroke-width="2"/>
+                    <text x="1025" y="110" text-anchor="middle" font-size="18" font-weight="bold" fill="#991b1b">
+                        CPU控制
+                    </text>
+                    
+                    <rect x="925" y="140" width="200" height="80" rx="5" fill="#fecaca" stroke="#dc2626" stroke-width="1"/>
+                    <text x="1025" y="165" text-anchor="middle" font-size="14" font-weight="bold" fill="#7f1d1d">系统调度</text>
+                    <text x="1025" y="185" text-anchor="middle" font-size="12" fill="#7f1d1d">任务分配</text>
+                    <text x="1025" y="205" text-anchor="middle" font-size="12" fill="#7f1d1d">资源管理</text>
+                    
+                    <rect x="925" y="240" width="200" height="80" rx="5" fill="#fecaca" stroke="#dc2626" stroke-width="1"/>
+                    <text x="1025" y="265" text-anchor="middle" font-size="14" font-weight="bold" fill="#7f1d1d">实时控制</text>
+                    <text x="1025" y="285" text-anchor="middle" font-size="12" fill="#7f1d1d">运动控制</text>
+                    <text x="1025" y="305" text-anchor="middle" font-size="12" fill="#7f1d1d">反馈调节</text>
+                    
+                    <rect x="925" y="340" width="200" height="80" rx="5" fill="#fecaca" stroke="#dc2626" stroke-width="1"/>
+                    <text x="1025" y="365" text-anchor="middle" font-size="14" font-weight="bold" fill="#7f1d1d">通信管理</text>
+                    <text x="1025" y="385" text-anchor="middle" font-size="12" fill="#7f1d1d">协议栈</text>
+                    <text x="1025" y="405" text-anchor="middle" font-size="12" fill="#7f1d1d">数据传输</text>
+                    
+                    <rect x="925" y="440" width="200" height="80" rx="5" fill="#fecaca" stroke="#dc2626" stroke-width="1"/>
+                    <text x="1025" y="465" text-anchor="middle" font-size="14" font-weight="bold" fill="#7f1d1d">执行输出</text>
+                    <text x="1025" y="485" text-anchor="middle" font-size="12" fill="#7f1d1d">指令生成</text>
+                    <text x="1025" y="505" text-anchor="middle" font-size="12" fill="#7f1d1d">动作执行</text>
+                </g>
+                
+                <!-- Data Flow Arrows -->
+                <defs>
+                    <marker id="arrow2" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#3182ce"/>
+                    </marker>
+                </defs>
+                
+                <!-- Sensor to VPU -->
+                <path d="M 250 170 L 300 170" stroke="#3182ce" stroke-width="3" marker-end="url(#arrow2)"/>
+                <path d="M 250 250 L 300 250" stroke="#3182ce" stroke-width="3" marker-end="url(#arrow2)"/>
+                <path d="M 250 330 L 300 330" stroke="#3182ce" stroke-width="3" marker-end="url(#arrow2)"/>
+                <path d="M 250 410 L 300 410" stroke="#3182ce" stroke-width="3" marker-end="url(#arrow2)"/>
+                <path d="M 250 490 L 300 490" stroke="#3182ce" stroke-width="3" marker-end="url(#arrow2)"/>
+                
+                <!-- VPU to NPU -->
+                <path d="M 550 180 L 600 180" stroke="#3182ce" stroke-width="3" marker-end="url(#arrow2)"/>
+                <path d="M 550 280 L 600 280" stroke="#3182ce" stroke-width="3" marker-end="url(#arrow2)"/>
+                <path d="M 550 380 L 600 380" stroke="#3182ce" stroke-width="3" marker-end="url(#arrow2)"/>
+                <path d="M 550 480 L 600 480" stroke="#3182ce" stroke-width="3" marker-end="url(#arrow2)"/>
+                
+                <!-- NPU to CPU -->
+                <path d="M 850 180 L 900 180" stroke="#3182ce" stroke-width="3" marker-end="url(#arrow2)"/>
+                <path d="M 850 280 L 900 280" stroke="#3182ce" stroke-width="3" marker-end="url(#arrow2)"/>
+                <path d="M 850 380 L 900 380" stroke="#3182ce" stroke-width="3" marker-end="url(#arrow2)"/>
+                <path d="M 850 480 L 900 480" stroke="#3182ce" stroke-width="3" marker-end="url(#arrow2)"/>
+                
+                <!-- Latency Labels -->
+                <text x="275" y="160" text-anchor="middle" font-size="12" fill="#1e40af">&lt;0.1ms</text>
+                <text x="575" y="170" text-anchor="middle" font-size="12" fill="#1e40af">&lt;1ms</text>
+                <text x="875" y="170" text-anchor="middle" font-size="12" fill="#1e40af">&lt;5ms</text>
+                
+                <!-- Bottom Summary -->
+                <rect x="150" y="620" width="900" height="50" rx="10" fill="#f3f4f6" stroke="#6b7280" stroke-width="2"/>
+                <text x="600" y="650" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">
+                    端到端延迟: &lt;10ms | 功耗: &lt;30W | 吞吐量: 30-60fps @ 4K
+                </text>
+            </svg>
+        </div>
+
+        <!-- 3. 内存架构图 -->
+        <div class="diagram-container">
+            <h3 class="diagram-title">3. 统一内存架构 (UMA) 详解</h3>
+            <svg viewBox="0 0 1200 600" xmlns="http://www.w3.org/2000/svg">
+                <!-- Background -->
+                <rect width="1200" height="600" fill="#f8fafc"/>
+                
+                <!-- Title -->
+                <text x="600" y="40" text-anchor="middle" font-size="24" font-weight="bold" fill="#1a365d">
+                    统一低延迟内存架构
+                </text>
+                
+                <!-- Central Memory Pool -->
+                <rect x="350" y="200" width="500" height="200" rx="15" fill="#fee2e2" stroke="#ef4444" stroke-width="3"/>
+                <text x="600" y="240" text-anchor="middle" font-size="20" font-weight="bold" fill="#991b1b">
+                    共享内存池
+                </text>
+                <text x="600" y="270" text-anchor="middle" font-size="16" fill="#dc2626">
+                    32GB LPDDR5X
+                </text>
+                <text x="600" y="295" text-anchor="middle" font-size="14" fill="#b91c1c">
+                    200GB/s 带宽 | ECC保护
+                </text>
+                
+                <!-- Memory Controllers -->
+                <rect x="380" y="320" width="200" height="60" rx="5" fill="#fecaca" stroke="#dc2626" stroke-width="1"/>
+                <text x="480" y="355" text-anchor="middle" font-size="14" fill="#7f1d1d">4×内存控制器</text>
+                
+                <rect x="620" y="320" width="200" height="60" rx="5" fill="#fecaca" stroke="#dc2626" stroke-width="1"/>
+                <text x="720" y="355" text-anchor="middle" font-size="14" fill="#7f1d1d">智能预取引擎</text>
+                
+                <!-- Processing Units -->
+                <!-- CPU -->
+                <rect x="100" y="80" width="180" height="80" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+                <text x="190" y="110" text-anchor="middle" font-size="16" font-weight="bold" fill="#92400e">RISC-V CPU</text>
+                <text x="190" y="135" text-anchor="middle" font-size="12" fill="#78350f">L1: 64KB×8</text>
+                <text x="190" y="150" text-anchor="middle" font-size="12" fill="#78350f">L2: 2MB共享</text>
+                
+                <!-- VPU -->
+                <rect x="510" y="80" width="180" height="80" rx="10" fill="#d1fae5" stroke="#10b981" stroke-width="2"/>
+                <text x="600" y="110" text-anchor="middle" font-size="16" font-weight="bold" fill="#064e3b">VPU</text>
+                <text x="600" y="135" text-anchor="middle" font-size="12" fill="#065f46">专用缓存</text>
+                <text x="600" y="150" text-anchor="middle" font-size="12" fill="#065f46">4MB SRAM</text>
+                
+                <!-- NPU -->
+                <rect x="920" y="80" width="180" height="80" rx="10" fill="#ede9fe" stroke="#8b5cf6" stroke-width="2"/>
+                <text x="1010" y="110" text-anchor="middle" font-size="16" font-weight="bold" fill="#4c1d95">NPU</text>
+                <text x="1010" y="135" text-anchor="middle" font-size="12" fill="#5b21b6">权重缓存</text>
+                <text x="1010" y="150" text-anchor="middle" font-size="12" fill="#5b21b6">8MB SRAM</text>
+                
+                <!-- DMA Engines -->
+                <rect x="100" y="450" width="180" height="80" rx="10" fill="#f0fdf4" stroke="#22c55e" stroke-width="2"/>
+                <text x="190" y="480" text-anchor="middle" font-size="16" font-weight="bold" fill="#14532d">DMA引擎</text>
+                <text x="190" y="505" text-anchor="middle" font-size="12" fill="#166534">零拷贝传输</text>
+                
+                <rect x="360" y="450" width="180" height="80" rx="10" fill="#f0fdf4" stroke="#22c55e" stroke-width="2"/>
+                <text x="450" y="480" text-anchor="middle" font-size="16" font-weight="bold" fill="#14532d">传感器DMA</text>
+                <text x="450" y="505" text-anchor="middle" font-size="12" fill="#166534">直接写入</text>
+                
+                <rect x="660" y="450" width="180" height="80" rx="10" fill="#f0fdf4" stroke="#22c55e" stroke-width="2"/>
+                <text x="750" y="480" text-anchor="middle" font-size="16" font-weight="bold" fill="#14532d">显示DMA</text>
+                <text x="750" y="505" text-anchor="middle" font-size="12" fill="#166534">扫描输出</text>
+                
+                <rect x="920" y="450" width="180" height="80" rx="10" fill="#f0fdf4" stroke="#22c55e" stroke-width="2"/>
+                <text x="1010" y="480" text-anchor="middle" font-size="16" font-weight="bold" fill="#14532d">网络DMA</text>
+                <text x="1010" y="505" text-anchor="middle" font-size="12" fill="#166534">高速传输</text>
+                
+                <!-- Connection Lines -->
+                <defs>
+                    <marker id="arrow3" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#3182ce"/>
+                    </marker>
+                </defs>
+                
+                <!-- CPU to Memory -->
+                <path d="M 190 160 L 190 180 L 400 180 L 400 200" stroke="#3182ce" stroke-width="3" marker-end="url(#arrow3)"/>
+                <text x="295" y="175" text-anchor="middle" font-size="12" fill="#1e40af">50GB/s</text>
+                
+                <!-- VPU to Memory -->
+                <path d="M 600 160 L 600 200" stroke="#3182ce" stroke-width="3" marker-end="url(#arrow3)"/>
+                <text x="630" y="180" text-anchor="middle" font-size="12" fill="#1e40af">80GB/s</text>
+                
+                <!-- NPU to Memory -->
+                <path d="M 1010 160 L 1010 180 L 800 180 L 800 200" stroke="#3182ce" stroke-width="3" marker-end="url(#arrow3)"/>
+                <text x="905" y="175" text-anchor="middle" font-size="12" fill="#1e40af">70GB/s</text>
+                
+                <!-- DMA to Memory -->
+                <path d="M 190 450 L 190 420 L 450 420 L 450 400" stroke="#22c55e" stroke-width="2" marker-end="url(#arrow3)"/>
+                <path d="M 450 450 L 450 420 L 550 420 L 550 400" stroke="#22c55e" stroke-width="2" marker-end="url(#arrow3)"/>
+                <path d="M 750 450 L 750 420 L 650 420 L 650 400" stroke="#22c55e" stroke-width="2" marker-end="url(#arrow3)"/>
+                <path d="M 1010 450 L 1010 420 L 750 420 L 750 400" stroke="#22c55e" stroke-width="2" marker-end="url(#arrow3)"/>
+                
+                <!-- Features -->
+                <g transform="translate(50, 280)">
+                    <rect x="0" y="0" width="200" height="120" rx="5" fill="#e0e7ff" stroke="#6366f1" stroke-width="1"/>
+                    <text x="100" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="#4338ca">关键特性</text>
+                    <text x="10" y="50" font-size="12" fill="#4338ca">• 零拷贝数据共享</text>
+                    <text x="10" y="70" font-size="12" fill="#4338ca">• 硬件内存保护</text>
+                    <text x="10" y="90" font-size="12" fill="#4338ca">• 动态带宽分配</text>
+                    <text x="10" y="110" font-size="12" fill="#4338ca">• 低延迟访问</text>
+                </g>
+                
+                <g transform="translate(950, 280)">
+                    <rect x="0" y="0" width="200" height="120" rx="5" fill="#dcfce7" stroke="#22c55e" stroke-width="1"/>
+                    <text x="100" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="#15803d">优化技术</text>
+                    <text x="10" y="50" font-size="12" fill="#15803d">• 智能数据预取</text>
+                    <text x="10" y="70" font-size="12" fill="#15803d">• 缓存一致性</text>
+                    <text x="10" y="90" font-size="12" fill="#15803d">• 压缩传输</text>
+                    <text x="10" y="110" font-size="12" fill="#15803d">• QoS保证</text>
+                </g>
+            </svg>
+        </div>
+
+        <!-- 4. 软件架构图 -->
+        <div class="diagram-container">
+            <h3 class="diagram-title">4. 软件栈架构</h3>
+            <svg viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg">
+                <!-- Background -->
+                <rect width="1200" height="700" fill="#f8fafc"/>
+                
+                <!-- Title -->
+                <text x="600" y="40" text-anchor="middle" font-size="24" font-weight="bold" fill="#1a365d">
+                    MindCore 软件生态系统
+                </text>
+                
+                <!-- Application Layer -->
+                <rect x="100" y="80" width="1000" height="80" rx="10" fill="#e0e7ff" stroke="#6366f1" stroke-width="2"/>
+                <text x="600" y="110" text-anchor="middle" font-size="18" font-weight="bold" fill="#4338ca">
+                    应用层
+                </text>
+                <text x="200" y="140" text-anchor="middle" font-size="14" fill="#4338ca">机器人应用</text>
+                <text x="400" y="140" text-anchor="middle" font-size="14" fill="#4338ca">视觉应用</text>
+                <text x="600" y="140" text-anchor="middle" font-size="14" fill="#4338ca">AI推理服务</text>
+                <text x="800" y="140" text-anchor="middle" font-size="14" fill="#4338ca">控制系统</text>
+                <text x="1000" y="140" text-anchor="middle" font-size="14" fill="#4338ca">用户界面</text>
+                
+                <!-- Framework Layer -->
+                <rect x="100" y="180" width="1000" height="100" rx="10" fill="#dcfce7" stroke="#22c55e" stroke-width="2"/>
+                <text x="600" y="210" text-anchor="middle" font-size="18" font-weight="bold" fill="#15803d">
+                    框架层
+                </text>
+                <rect x="120" y="220" width="220" height="45" rx="5" fill="#bbf7d0" stroke="#16a34a" stroke-width="1"/>
+                <text x="230" y="248" text-anchor="middle" font-size="14" fill="#14532d">ROS 2适配层</text>
+                
+                <rect x="360" y="220" width="220" height="45" rx="5" fill="#bbf7d0" stroke="#16a34a" stroke-width="1"/>
+                <text x="470" y="248" text-anchor="middle" font-size="14" fill="#14532d">PyTorch/TensorFlow</text>
+                
+                <rect x="600" y="220" width="220" height="45" rx="5" fill="#bbf7d0" stroke="#16a34a" stroke-width="1"/>
+                <text x="710" y="248" text-anchor="middle" font-size="14" fill="#14532d">OpenCV加速版</text>
+                
+                <rect x="840" y="220" width="220" height="45" rx="5" fill="#bbf7d0" stroke="#16a34a" stroke-width="1"/>
+                <text x="950" y="248" text-anchor="middle" font-size="14" fill="#14532d">SLAM框架</text>
+                
+                <!-- SDK Layer -->
+                <rect x="100" y="300" width="1000" height="120" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+                <text x="600" y="330" text-anchor="middle" font-size="18" font-weight="bold" fill="#92400e">
+                    MindCore SDK
+                </text>
+                
+                <rect x="120" y="350" width="150" height="50" rx="5" fill="#fed7aa" stroke="#f97316" stroke-width="1"/>
+                <text x="195" y="380" text-anchor="middle" font-size="13" fill="#7c2d12">C++ API</text>
+                
+                <rect x="290" y="350" width="150" height="50" rx="5" fill="#fed7aa" stroke="#f97316" stroke-width="1"/>
+                <text x="365" y="380" text-anchor="middle" font-size="13" fill="#7c2d12">Python绑定</text>
+                
+                <rect x="460" y="350" width="150" height="50" rx="5" fill="#fed7aa" stroke="#f97316" stroke-width="1"/>
+                <text x="535" y="380" text-anchor="middle" font-size="13" fill="#7c2d12">性能分析器</text>
+                
+                <rect x="630" y="350" width="150" height="50" rx="5" fill="#fed7aa" stroke="#f97316" stroke-width="1"/>
+                <text x="705" y="380" text-anchor="middle" font-size="13" fill="#7c2d12">调试工具</text>
+                
+                <rect x="800" y="350" width="150" height="50" rx="5" fill="#fed7aa" stroke="#f97316" stroke-width="1"/>
+                <text x="875" y="380" text-anchor="middle" font-size="13" fill="#7c2d12">模型转换器</text>
+                
+                <rect x="970" y="350" width="110" height="50" rx="5" fill="#fed7aa" stroke="#f97316" stroke-width="1"/>
+                <text x="1025" y="380" text-anchor="middle" font-size="13" fill="#7c2d12">示例代码</text>
+                
+                <!-- Runtime Layer -->
+                <rect x="100" y="440" width="1000" height="100" rx="10" fill="#ede9fe" stroke="#8b5cf6" stroke-width="2"/>
+                <text x="600" y="470" text-anchor="middle" font-size="18" font-weight="bold" fill="#4c1d95">
+                    运行时层
+                </text>
+                
+                <rect x="120" y="480" width="220" height="45" rx="5" fill="#ddd6fe" stroke="#7c3aed" stroke-width="1"/>
+                <text x="230" y="508" text-anchor="middle" font-size="14" fill="#4c1d95">任务调度器</text>
+                
+                <rect x="360" y="480" width="220" height="45" rx="5" fill="#ddd6fe" stroke="#7c3aed" stroke-width="1"/>
+                <text x="470" y="508" text-anchor="middle" font-size="14" fill="#4c1d95">内存管理器</text>
+                
+                <rect x="600" y="480" width="220" height="45" rx="5" fill="#ddd6fe" stroke="#7c3aed" stroke-width="1"/>
+                <text x="710" y="508" text-anchor="middle" font-size="14" fill="#4c1d95">编译器/JIT</text>
+                
+                <rect x="840" y="480" width="220" height="45" rx="5" fill="#ddd6fe" stroke="#7c3aed" stroke-width="1"/>
+                <text x="950" y="508" text-anchor="middle" font-size="14" fill="#4c1d95">硬件抽象层</text>
+                
+                <!-- Driver Layer -->
+                <rect x="100" y="560" width="1000" height="80" rx="10" fill="#fee2e2" stroke="#ef4444" stroke-width="2"/>
+                <text x="600" y="590" text-anchor="middle" font-size="18" font-weight="bold" fill="#991b1b">
+                    驱动层
+                </text>
+                <text x="250" y="620" text-anchor="middle" font-size="14" fill="#dc2626">CPU驱动</text>
+                <text x="450" y="620" text-anchor="middle" font-size="14" fill="#dc2626">VPU驱动</text>
+                <text x="600" y="620" text-anchor="middle" font-size="14" fill="#dc2626">NPU驱动</text>
+                <text x="750" y="620" text-anchor="middle" font-size="14" fill="#dc2626">传感器驱动</text>
+                <text x="950" y="620" text-anchor="middle" font-size="14" fill="#dc2626">外设驱动</text>
+                
+                <!-- Compatibility Note -->
+                <rect x="300" y="660" width="600" height="30" rx="5" fill="#f3f4f6" stroke="#6b7280" stroke-width="1"/>
+                <text x="600" y="680" text-anchor="middle" font-size="14" fill="#4b5563">
+                    兼容ROCM/CUDA编程模型 | 支持主流AI框架 | 提供迁移工具
+                </text>
+            </svg>
+        </div>
+
+        <!-- Export Buttons -->
+        <div class="export-buttons">
+            <button class="export-btn" onclick="exportSVG()">导出为SVG</button>
+            <button class="export-btn" onclick="exportPNG()">导出为PNG</button>
+            <button class="export-btn" onclick="printDiagrams()">打印</button>
+        </div>
+    </div>
+
+    <!-- Tooltip -->
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        // Export SVG function
+        function exportSVG() {
+            const svgs = document.querySelectorAll('svg');
+            svgs.forEach((svg, index) => {
+                const svgData = new XMLSerializer().serializeToString(svg);
+                const blob = new Blob([svgData], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `mindcore-architecture-${index + 1}.svg`;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        // Export PNG function
+        function exportPNG() {
+            const svgs = document.querySelectorAll('svg');
+            svgs.forEach((svg, index) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const svgData = new XMLSerializer().serializeToString(svg);
+                const img = new Image();
+                
+                img.onload = function() {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    canvas.toBlob(function(blob) {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `mindcore-architecture-${index + 1}.png`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                    });
+                };
+                
+                img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+            });
+        }
+
+        // Print function
+        function printDiagrams() {
+            window.print();
+        }
+
+        // Add hover effects for interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltip = document.getElementById('tooltip');
+            const interactiveElements = document.querySelectorAll('rect[id], g[id]');
+            
+            interactiveElements.forEach(element => {
+                element.style.cursor = 'pointer';
+                
+                element.addEventListener('mouseenter', function(e) {
+                    const rect = e.target.getBoundingClientRect();
+                    const tooltipText = getTooltipText(e.target.id);
+                    if (tooltipText) {
+                        tooltip.textContent = tooltipText;
+                        tooltip.style.left = rect.left + rect.width / 2 - tooltip.offsetWidth / 2 + 'px';
+                        tooltip.style.top = rect.top - tooltip.offsetHeight - 10 + 'px';
+                        tooltip.style.opacity = '1';
+                    }
+                });
+                
+                element.addEventListener('mouseleave', function() {
+                    tooltip.style.opacity = '0';
+                });
+            });
+        });
+
+        // Tooltip text mapping
+        function getTooltipText(id) {
+            const tooltips = {
+                'cpu-cluster': 'RISC-V处理器簇：负责系统控制、任务调度和实时响应',
+                'vpu': '视觉处理单元：专门优化的图像处理和3D感知硬件',
+                'npu': 'AI引擎：高效运行深度学习模型，支持最新AI算法',
+                'sensor-layer': '多模态传感器输入，支持相机、雷达、IMU等',
+                'vpu-processing': '实时视觉预处理，包括ISP、特征提取和数据融合',
+                'npu-processing': 'AI推理处理，支持目标检测、SLAM和决策',
+                'cpu-control': '系统级控制和协调，确保实时响应'
+            };
+            return tooltips[id] || '';
+        }
+    </script>
+</body>
+</html>
