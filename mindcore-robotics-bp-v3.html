@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindCore Vision - 机器人视觉智能处理器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow: hidden;
+        }
+        
+        .presentation {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .slide {
+            display: none;
+            width: 90%;
+            max-width: 1200px;
+            height: 90vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 20px;
+            padding: 60px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+            animation: slideIn 0.6s ease-out;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        h1 {
+            font-size: 3.5em;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            font-weight: 800;
+        }
+        
+        h2 {
+            font-size: 2.5em;
+            margin-bottom: 25px;
+            color: #00d2ff;
+            border-bottom: 3px solid #00d2ff;
+            padding-bottom: 15px;
+        }
+        
+        h3 {
+            font-size: 1.8em;
+            margin: 25px 0 15px;
+            color: #3a7bd5;
+        }
+        
+        .highlight-box {
+            background: rgba(0, 210, 255, 0.1);
+            border-left: 4px solid #00d2ff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .metric-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 210, 255, 0.3);
+            border-color: #00d2ff;
+        }
+        
+        .metric-number {
+            font-size: 3em;
+            font-weight: bold;
+            color: #00d2ff;
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        .architecture-diagram {
+            background: rgba(255, 255, 255, 0.02);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #00d2ff;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .comparison-table th {
+            background: rgba(0, 210, 255, 0.2);
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+            border-bottom: 2px solid #00d2ff;
+        }
+        
+        .comparison-table td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .comparison-table tr:hover {
+            background: rgba(0, 210, 255, 0.05);
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 1000;
+        }
+        
+        .nav-btn {
+            padding: 12px 30px;
+            background: rgba(0, 210, 255, 0.2);
+            border: 2px solid #00d2ff;
+            color: #00d2ff;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-btn:hover {
+            background: rgba(0, 210, 255, 0.4);
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0, 210, 255, 0.5);
+        }
+        
+        .slide-number {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .logo {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #00d2ff;
+        }
+        
+        .priority-pyramid {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 40px 0;
+        }
+        
+        .pyramid-level {
+            background: rgba(0, 210, 255, 0.1);
+            border: 2px solid #00d2ff;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .pyramid-level:nth-child(1) {
+            width: 60%;
+            background: rgba(0, 210, 255, 0.3);
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        
+        .pyramid-level:nth-child(2) {
+            width: 70%;
+            background: rgba(0, 210, 255, 0.2);
+            font-size: 1.3em;
+        }
+        
+        .pyramid-level:nth-child(3) {
+            width: 80%;
+            background: rgba(0, 210, 255, 0.15);
+            font-size: 1.2em;
+        }
+        
+        .pyramid-level:nth-child(4) {
+            width: 90%;
+            background: rgba(0, 210, 255, 0.1);
+            font-size: 1.1em;
+        }
+        
+        .vision-feature {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin: 30px 0;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+        }
+        
+        .vision-icon {
+            font-size: 60px;
+            color: #00d2ff;
+        }
+        
+        .vision-content h3 {
+            margin-bottom: 10px;
+        }
+        
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+            margin: 40px 0;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #00d2ff;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding: 20px;
+            margin: 20px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            width: 45%;
+        }
+        
+        .timeline-item:nth-child(odd) {
+            margin-left: 0;
+        }
+        
+        .timeline-item:nth-child(even) {
+            margin-left: 55%;
+        }
+        
+        .timeline-marker {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #00d2ff;
+            border-radius: 50%;
+            top: 25px;
+        }
+        
+        .timeline-item:nth-child(odd) .timeline-marker {
+            right: -35px;
+        }
+        
+        .timeline-item:nth-child(even) .timeline-marker {
+            left: -35px;
+        }
+        
+        @media (max-width: 768px) {
+            .slide {
+                padding: 30px;
+            }
+            
+            h1 {
+                font-size: 2.5em;
+            }
+            
+            h2 {
+                font-size: 2em;
+            }
+            
+            .metric-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .timeline-item {
+                width: 100%;
+                margin-left: 0 !important;
+            }
+            
+            .timeline::before {
+                left: 20px;
+            }
+            
+            .timeline-marker {
+                left: 10px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+        <div class="logo">MindCore Vision</div>
+        <div class="slide-number" id="slideNumber">1 / 12</div>
+        
+        <!-- 幻灯片 1: 标题页 -->
+        <div class="slide active">
+            <h1>MindCore Vision</h1>
+            <h2 style="text-align: center; border: none;">机器人视觉智能处理器</h2>
+            <div style="text-align: center; margin-top: 50px;">
+                <p style="font-size: 1.5em; margin-bottom: 20px;">重新定义机器人视觉处理</p>
+                <p style="font-size: 1.2em; color: rgba(255, 255, 255, 0.7);">异构计算 · 极速视觉 · 灵活编程</p>
+            </div>
+            <div style="position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);">
+                <p style="font-size: 1.1em;">商业计划书 V3.0</p>
+                <p style="color: rgba(255, 255, 255, 0.5);">基于行业深度调研</p>
+            </div>
+        </div>
+        
+        <!-- 幻灯片 2: 技术优先级金字塔 -->
+        <div class="slide">
+            <h2>行业洞察：技术优先级革命</h2>
+            <p style="text-align: center; font-size: 1.3em; margin-bottom: 30px;">基于邓博士等行业专家深度访谈</p>
+            <div class="priority-pyramid">
+                <div class="pyramid-level">异构架构 (CPU+GPU+NPU)</div>
+                <div class="pyramid-level">软件生态系统</div>
+                <div class="pyramid-level">功耗效率</div>
+                <div class="pyramid-level">算力规模</div>
+            </div>
+            <div class="highlight-box">
+                <h3>核心洞察</h3>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li>✓ 异构架构是必然选择，GPGPU因功耗不适合机器人</li>
+                    <li>✓ 易用的软件生态比峰值性能更重要</li>
+                    <li>✓ 100-150 TOPS足够，无需盲目追求2000 TOPS</li>
+                    <li>✓ 视觉处理速度(fps)比总算力(TOPS)更关键</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- 幻灯片 3: 市场机会 -->
+        <div class="slide">
+            <h2>千亿市场的结构性机会</h2>
+            <div class="metric-grid">
+                <div class="metric-card">
+                    <span class="metric-number">$526亿</span>
+                    <p>2032年全球市场规模</p>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-number">29.7%</span>
+                    <p>年复合增长率</p>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-number">40%</span>
+                    <p>中国市场份额</p>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-number">475亿</span>
+                    <p>大基金三期支持</p>
+                </div>
+            </div>
+            <div class="highlight-box">
+                <h3>核心痛点</h3>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li>🔴 当前方案仅支持30fps，高动态场景需要200-300fps</li>
+                    <li>🔴 GPGPU功耗60W+，移动机器人无法承受</li>
+                    <li>🔴 纯ASIC缺乏灵活性，无法适应快速演进的AI模型</li>
+                    <li>🔴 内存带宽瓶颈，视觉数据处理需要200GB/s+</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- 幻灯片 4: 视觉为中心的架构 -->
+        <div class="slide">
+            <h2>革命性视觉处理架构</h2>
+            <div class="architecture-diagram">
+┌─────────────────────────────────────────────────────┐
+│         MindCore Vision 异构SoC架构                  │
+├─────────────────────────────────────────────────────┤
+│  应用处理器：8×ARM Cortex-A78 @ 2.8GHz              │
+│  视觉加速器：Mali-G710 MC10 / 定制GPU               │
+│  AI引擎：150 TOPS RISC-V NPU（可编程）              │
+│  ↕ 统一内存架构 (UMA) - 200GB/s LPDDR5X ↕          │
+│  ISP阵列：16路 4K@60fps 并行处理                    │
+│  视频编解码：H.265/AV1 硬件加速                     │
+│  传感器接口：16×MIPI CSI-2 直连摄像头               │
+│  系统接口：PCIe 4.0 + CAN-FD + 千兆以太网           │
+└─────────────────────────────────────────────────────┘
+            </div>
+            <div class="metric-grid">
+                <div class="metric-card">
+                    <span class="metric-number">200-300</span>
+                    <p>FPS 视觉处理</p>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-number">200 GB/s</span>
+                    <p>内存带宽</p>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-number">16路</span>
+                    <p>摄像头并行</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 幻灯片 5: 软件生态战略 -->
+        <div class="slide">
+            <h2>软件定义成功</h2>
+            <div class="vision-feature">
+                <div class="vision-icon">🚀</div>
+                <div class="vision-content">
+                    <h3>类ROCM编程接口</h3>
+                    <p>让NPU像GPU一样易用，支持C++/Python，兼容PyTorch/TensorFlow</p>
+                </div>
+            </div>
+            <div class="vision-feature">
+                <div class="vision-icon">🔄</div>
+                <div class="vision-content">
+                    <h3>模型快速迭代</h3>
+                    <p>原生支持VLA、OpenVLA、OpenHACL等新兴模型，灵活适配MoE架构</p>
+                </div>
+            </div>
+            <div class="vision-feature">
+                <div class="vision-icon">🛠️</div>
+                <div class="vision-content">
+                    <h3>完整工具链</h3>
+                    <p>LLVM编译器、可视化调试器、周期精确仿真器、一键模型转换</p>
+                </div>
+            </div>
+            <div class="highlight-box">
+                <h3>生态建设路线图</h3>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li>📅 0-12月：核心SDK + 基础工具发布</li>
+                    <li>📅 12-24月：开源社区 + 高校合作计划</li>
+                    <li>📅 24月+：行业标准制定 + 认证体系</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- 幻灯片 6: 技术规格对比 -->
+        <div class="slide">
+            <h2>性能对标分析</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>特性</th>
+                        <th style="background: rgba(0, 210, 255, 0.4);">MindCore Vision</th>
+                        <th>Jetson Orin</th>
+                        <th>地平线J6</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>架构类型</td>
+                        <td><strong>异构SoC</strong></td>
+                        <td>GPGPU</td>
+                        <td>专用ASIC</td>
+                    </tr>
+                    <tr>
+                        <td>AI算力</td>
+                        <td><strong>100-150 TOPS</strong></td>
+                        <td>275 TOPS</td>
+                        <td>128 TOPS</td>
+                    </tr>
+                    <tr>
+                        <td>内存带宽</td>
+                        <td><strong>200 GB/s</strong></td>
+                        <td>205 GB/s</td>
+                        <td>64 GB/s</td>
+                    </tr>
+                    <tr>
+                        <td>视觉处理</td>
+                        <td><strong>200-300 fps</strong></td>
+                        <td>30-60 fps</td>
+                        <td>60 fps</td>
+                    </tr>
+                    <tr>
+                        <td>功耗</td>
+                        <td><strong>35W</strong></td>
+                        <td>60W</td>
+                        <td>35W</td>
+                    </tr>
+                    <tr>
+                        <td>编程模型</td>
+                        <td><strong>类ROCM</strong></td>
+                        <td>CUDA</td>
+                        <td>专用SDK</td>
+                    </tr>
+                    <tr>
+                        <td>目标价格</td>
+                        <td><strong>$350</strong></td>
+                        <td>$699</td>
+                        <td>$400</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="highlight-box">
+                <p><strong>核心优势：</strong>最高视觉处理速度 + 灵活编程 + 合理价格</p>
+            </div>
+        </div>
+        
+        <!-- 幻灯片 7: 差异化市场策略 -->
+        <div class="slide">
+            <h2>差异化竞争策略</h2>
+            <h3 style="text-align: center; color: #00d2ff;">"视觉速度定义未来"</h3>
+            <div class="metric-grid">
+                <div class="metric-card">
+                    <span class="metric-number">🚁</span>
+                    <h3>高速无人机</h3>
+                    <p>200+ fps追踪与避障</p>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-number">🏎️</span>
+                    <h3>赛车级自动驾驶</h3>
+                    <p>300 fps极限反应</p>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-number">🏭</span>
+                    <h3>工业高速检测</h3>
+                    <p>微秒级缺陷识别</p>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-number">⚽</span>
+                    <h3>体育运动分析</h3>
+                    <p>超高速动作捕捉</p>
+                </div>
+            </div>
+            <div class="highlight-box">
+                <h3>竞争策略</h3>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li>❌ 不与英伟达比拼总算力</li>
+                    <li>❌ 不与地平线争夺汽车市场</li>
+                    <li>✅ 专注高速视觉处理细分赛道</li>
+                    <li>✅ 成为"机器人的眼睛"</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- 幻灯片 8: 多层次计算愿景 -->
+        <div class="slide">
+            <h2>多层次计算架构</h2>
+            <div style="text-align: center; margin: 30px 0;">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjMGEwYTBhIi8+CiAgICA8IS0tIENsb3VkIC0tPgogICAgPGNpcmNsZSBjeD0iNDAwIiBjeT0iODAiIHI9IjYwIiBmaWxsPSIjMDBkMmZmIiBvcGFjaXR5PSIwLjMiLz4KICAgIDx0ZXh0IHg9IjQwMCIgeT0iODUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LXNpemU9IjE4Ij7kupHnq6/nrpflipvkuK3lv4M8L3RleHQ+CiAgICA8IS0tIENoYXJnaW5nIFN0YXRpb24gLS0+CiAgICA8cmVjdCB4PSIxNTAiIHk9IjE4MCIgd2lkdGg9IjE2MCIgaGVpZ2h0PSI4MCIgZmlsbD0iIzAwZDJmZiIgb3BhY2l0eT0iMC4zIiByeD0iMTAiLz4KICAgIDx0ZXh0IHg9IjIzMCIgeT0iMjI1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1zaXplPSIxNiI+5YWF55S15qGp566X5YqbPC90ZXh0PgogICAgPCEtLSBFZGdlIERldmljZSAtLT4KICAgIDxyZWN0IHg9IjQ5MCIgeT0iMTgwIiB3aWR0aD0iMTYwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjMDBkMmZmIiBvcGFjaXR5PSIwLjMiIHJ4PSIxMCIvPgogICAgPHRleHQgeD0iNTcwIiB5PSIyMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LXNpemU9IjE2Ij7mnLrlmajkurrmnKznlLDorr7lpIc8L3RleHQ+CiAgICA8IS0tIENvbm5lY3Rpb25zIC0tPgogICAgPGxpbmUgeDE9IjQwMCIgeTE9IjE0MCIgeDI9IjIzMCIgeTI9IjE4MCIgc3Ryb2tlPSIjMDBkMmZmIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuNSIvPgogICAgPGxpbmUgeDE9IjQwMCIgeTE9IjE0MCIgeDI9IjU3MCIgeTI9IjE4MCIgc3Ryb2tlPSIjMDBkMmZmIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuNSIvPgogICAgPGxpbmUgeDE9IjIzMCIgeTE9IjI2MCIgeDI9IjU3MCIgeTI9IjI2MCIgc3Ryb2tlPSIjMDBkMmZmIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuNSIvPgo8L3N2Zz4=" style="max-width: 100%; height: auto;">
+            </div>
+            <div class="highlight-box">
+                <h3>分布式计算优势</h3>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li>🔹 边缘设备：100-150 TOPS实时处理</li>
+                    <li>🔹 充电站：额外算力支持，数据预处理</li>
+                    <li>🔹 云端：大模型训练，全局优化</li>
+                    <li>🔹 协同计算：突破单一设备算力限制</li>
+                </ul>
+            </div>
+            <p style="text-align: center; font-size: 1.2em; margin-top: 30px;">
+                <strong>创新洞察：</strong>充电时不仅补充能量，更补充智能
+            </p>
+        </div>
+        
+        <!-- 幻灯片 9: 合作伙伴战略 -->
+        <div class="slide">
+            <h2>战略合作伙伴</h2>
+            <div class="vision-feature">
+                <div class="vision-icon">🤝</div>
+                <div class="vision-content">
+                    <h3>国科智能（已确认）</h3>
+                    <p>深度技术合作，共同定义下一代机器人视觉标准</p>
+                </div>
+            </div>
+            <div class="vision-feature">
+                <div class="vision-icon">🚁</div>
+                <div class="vision-content">
+                    <h3>TOP3无人机厂商（进行中）</h3>
+                    <p>POC测试中，目标实现250fps避障系统</p>
+                </div>
+            </div>
+            <div class="vision-feature">
+                <div class="vision-icon">🚗</div>
+                <div class="vision-content">
+                    <h3>自动驾驶Tier1（规划中）</h3>
+                    <p>L4级别高速场景视觉处理方案</p>
+                </div>
+            </div>
+            <div class="highlight-box">
+                <h3>合作优势</h3>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li>✓ 已有成熟的RISC-V NPU IP基础</li>
+                    <li>✓ 与客户共同定义产品，确保市场适配</li>
+                    <li>✓ 前期NRE收入支持研发</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- 幻灯片 10: 开发路线图 -->
+        <div class="slide">
+            <h2>技术开发路线图</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <h3>阶段一：架构验证</h3>
+                    <p><strong>0-9个月</strong></p>
+                    <ul>
+                        <li>异构架构设计完成</li>
+                        <li>FPGA原型达到100fps</li>
+                        <li>软件SDK Alpha版</li>
+                    </ul>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <h3>阶段二：工程实现</h3>
+                    <p><strong>9-18个月</strong></p>
+                    <ul>
+                        <li>12nm工艺MPW流片</li>
+                        <li>达到200fps目标</li>
+                        <li>3家客户POC验证</li>
+                    </ul>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <h3>阶段三：产品化</h3>
+                    <p><strong>18-30个月</strong></p>
+                    <ul>
+                        <li>量产版本发布</li>
+                        <li>300fps极限性能</li>
+                        <li>完整生态系统</li>
+                    </ul>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <h3>阶段四：平台化</h3>
+                    <p><strong>30个月+</strong></p>
+                    <ul>
+                        <li>第二代产品规划</li>
+                        <li>垂直行业方案</li>
+                        <li>全球市场拓展</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 幻灯片 11: 财务与融资 -->
+        <div class="slide">
+            <h2>融资计划</h2>
+            <div class="metric-grid">
+                <div class="metric-card">
+                    <span class="metric-number">1.5亿</span>
+                    <p>天使轮融资（RMB）</p>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-number">30%</span>
+                    <p>架构设计投入</p>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-number">20%</span>
+                    <p>软件生态建设</p>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-number">30人</span>
+                    <p>核心团队规模</p>
+                </div>
+            </div>
+            <h3>资金用途明细</h3>
+            <table class="comparison-table">
+                <tr>
+                    <td>异构架构设计与验证</td>
+                    <td>4500万（30%）</td>
+                </tr>
+                <tr>
+                    <td>软件SDK与工具链</td>
+                    <td>3000万（20%）</td>
+                </tr>
+                <tr>
+                    <td>核心团队建设</td>
+                    <td>3000万（20%）</td>
+                </tr>
+                <tr>
+                    <td>IP授权（ARM/GPU）</td>
+                    <td>2500万（17%）</td>
+                </tr>
+                <tr>
+                    <td>原型开发与测试</td>
+                    <td>1500万（10%）</td>
+                </tr>
+                <tr>
+                    <td>运营储备</td>
+                    <td>500万（3%）</td>
+                </tr>
+            </table>
+        </div>
+        
+        <!-- 幻灯片 12: 投资亮点总结 -->
+        <div class="slide">
+            <h2>投资价值总结</h2>
+            <div class="metric-grid">
+                <div class="metric-card">
+                    <span class="metric-number">🎯</span>
+                    <h3>精准定位</h3>
+                    <p>高速视觉处理细分赛道领导者</p>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-number">🏗️</span>
+                    <h3>技术领先</h3>
+                    <p>异构架构+200-300fps突破</p>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-number">👥</span>
+                    <h3>顶尖团队</h3>
+                    <p>AMD/英伟达/高通精英组合</p>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-number">🤝</span>
+                    <h3>客户验证</h3>
+                    <p>国科智能等深度合作</p>
+                </div>
+            </div>
+            <div class="highlight-box" style="margin-top: 40px;">
+                <h3>为什么是我们？</h3>
+                <ul style="list-style: none; padding-left: 0; font-size: 1.2em; line-height: 2;">
+                    <li>✓ <strong>独特洞察：</strong>视觉速度比算力更重要</li>
+                    <li>✓ <strong>技术积累：</strong>成熟的RISC-V NPU IP</li>
+                    <li>✓ <strong>务实路线：</strong>不盲目追求2000 TOPS</li>
+                    <li>✓ <strong>生态思维：</strong>软件定义成功</li>
+                </ul>
+            </div>
+            <div style="text-align: center; margin-top: 50px;">
+                <p style="font-size: 1.5em; color: #00d2ff;">共创机器人视觉智能新时代</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="navigation">
+        <button class="nav-btn" onclick="previousSlide()">上一页</button>
+        <button class="nav-btn" onclick="nextSlide()">下一页</button>
+    </div>
+    
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === index);
+            });
+            document.getElementById('slideNumber').textContent = `${index + 1} / ${totalSlides}`;
+        }
+        
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            showSlide(currentSlide);
+        }
+        
+        function previousSlide() {
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            showSlide(currentSlide);
+        }
+        
+        // 键盘导航
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') previousSlide();
+        });
+        
+        // 触摸手势支持
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+        
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) nextSlide();
+            if (touchEndX > touchStartX + 50) previousSlide();
+        }
+        
+        // 自动播放（可选）
+        let autoPlayInterval;
+        function startAutoPlay() {
+            autoPlayInterval = setInterval(nextSlide, 10000); // 10秒切换
+        }
+        
+        function stopAutoPlay() {
+            clearInterval(autoPlayInterval);
+        }
+        
+        // 鼠标悬停时停止自动播放
+        document.querySelector('.presentation').addEventListener('mouseenter', stopAutoPlay);
+        document.querySelector('.presentation').addEventListener('mouseleave', startAutoPlay);
+        
+        // 初始化
+        showSlide(0);
+    </script>
+</body>
+</html>
